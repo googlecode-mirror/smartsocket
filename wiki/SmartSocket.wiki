@@ -2,4 +2,6 @@
 
 = Introduction =
 
-Coming soon.
+SmartSocket is an open-source PHP socket server engine project.
+
+The community forums are loacated at http://www.smartsocket.net
