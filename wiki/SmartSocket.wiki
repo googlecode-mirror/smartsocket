@@ -1,0 +1,5 @@
+#summary An Intro to SmartSocket.
+
+= Introduction =
+
+Coming soon.
