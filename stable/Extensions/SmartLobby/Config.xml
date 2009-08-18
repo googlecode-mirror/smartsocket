@@ -1,1 +1,12 @@
-<config></config>
+<config>
+	<mysql enabled="true">
+		<connection host="localhost" username="smartlobby" password="smartlobby" database="smartlobby" />;
+	</mysql>
+	
+	<default_rooms>
+		<room name="Main Lobby" type="lobby" max_count="1000" />
+		<room name="Test Room" type="chat" max_count="1000" />
+		<room name="Test Game" type="game" max_count="16" />
+	</default_rooms>
+	
+</config>

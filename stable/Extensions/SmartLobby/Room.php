@@ -12,13 +12,14 @@ class Room {
 	//# Array of user objects
 	public $users = array();
 	
-	public function Room($name, $type="chat", $id, $max_count=16, $password=null) {
-		$this->name = (string)$name;
-		$this->type = (string)$type;
+	public function Room(&$id, $object) {
+		$this->name = (string)$object["name"];
+		$this->type = (string)$object["type"];
 		$this->count = 0;
-		$this->max_count = (int)$max_count;
-		$this->id = (int)$id;
-		$this->password = (string)$password;
+		$this->max_count = (int)$object["max_count"];
+		$this->id = $id;
+		$id++;
+		$this->password = (string)$object["password"];
 		Logger::log(__CLASS__, "New Room Object :");
 		print_r($this);
 		echo("**********\n");
@@ -57,7 +58,7 @@ class Room {
 		unset($this->users[$u->username]);
 		
 		if($this->count > 0) {
-				$server->Send($this->sockets, "<onUserLeave username='$u->username' />");
+			$server->Send($this->sockets, "<onUserLeave username='$u->username' />");
 		}
 	}
 	

@@ -32,18 +32,29 @@ Class SmartLobby implements Template{
 		Logger::log(__CLASS__, "Extension loaded.");
 		define("CLIENT_DEBUG", true);
 		
-		mysql_pconnect("localhost", "smartlobby", "smartlobby")or die("No Mysql?");
-		mysql_select_db("smartlobby") or die("No db?");
-		
-		//# Create test room
-		$rc = $this->RoomCount;
-		$this->RoomCount++;
-		$roomObj = new Room("Main Lobby", "lobby", $rc, 16);		
-		array_push($this->RoomObjects, $roomObj);
-		
 		//# Let's try and locate a configuration file. This is useful for making your own config for your extension.
 		if(@file_exists("Extensions/SmartLobby/Config.xml")) {
-			$this->Config = simplexml_load_file("Extensions/SmartLobby/Config.xml");
+			if($xml = simplexml_load_file("Extensions/SmartLobby/Config.xml")) {
+				
+				//# Let's setup the persistent mysql connection. We use this for registering users or checking usernames and credentials and perhaps even stats or profile tracking.
+				if((string)$xml->mysql["enabled"] == "true") {
+					$mysql = $xml->mysql->connection;					
+					mysql_pconnect((string)$mysql["host"], (string)$mysql["username"], (string)$mysql["password"])or Logger::log(__CLASS__, "SmartLobby cannot contact MySQL. Please check your Config.xml: ".mysql_error(), true);
+					mysql_select_db((string)$mysql["database"]) or Logger::log(__CLASS__, "SmartLobby cannot contact the database. Please check your Config.xml.", true);
+				}
+				
+				//# Now, we look at the configurations and create some default rooms.
+				
+				//print_r($xml);
+				$default_rooms = $xml->default_rooms;		
+				foreach($xml->default_rooms->room as $room){
+					$roomObj = new Room($this->RoomCount, $room);		
+					array_push($this->RoomObjects, $roomObj);
+				}
+			}else {
+				
+			}
+			
 		}else {
 			Logger::log(__CLASS__, "No extension config.xml file detected. Skipping...");
 		}
@@ -171,6 +182,10 @@ Class SmartLobby implements Template{
 		
 		if($r) {
 			$r->onUserLeave($socket, $this->s);
+			//# We need to send this to the main lobby. I need to make a revision later that checks
+			//# all rooms for a usercountupdate property. If it's true, send the room a message so 
+			//# that the user numbers stay current.
+			//$this->s->Send($this->RoomObjects[0]->sockets, "<onRoomUpdate room='".(int)$xml['id']."' event='UserCountUpdate' int='-1' />");
 		}
 			
 		//# If you want some other disconnect logic here, you can create it.
@@ -245,7 +260,7 @@ Class SmartLobby implements Template{
 	
 	//############### LISTING FEATURES
 	/**
-	 * Obtain an XML formatted list of RoomObjects.
+	 * Obtain an XML formatted list of Room objects, and send the data to the client...
 	 * @param $socket
 	 * @param $xml
 	 * @return unknown_type
@@ -273,13 +288,21 @@ Class SmartLobby implements Template{
 		
 		if( !( $this->RoomObjects[ (int)$xml["id"] ] instanceOf Room ) ) {
 			Logger::log(__CLASS__, $this->cd(__CLASS__,"joinRoom: NOT Room object."));
-			$this->s->Send($socket, "<onJoinRoom s='0' e='Error: Room ".(string)$xml['id']." does not exist.' />");
+			$this->s->Send($socket, "<onJoinRoom s='0' e='Error: Room ".(string)$xml['id']." does not exist.' />".chr(0));
 			return false;
 		}
 		
 		$r = &$this->RoomObjects[ (int)$xml["id"] ];
 			
 		$r->newUser($socket, $this->getUserObj($socket), $this->s);
+		
+		//# We need to send this to the main lobby. I need to make a revision later that checks
+		//# all rooms for a usercountupdate property. If it's true, send the room a message so 
+		//# that the user numbers stay current.
+		/**
+		 * @todo handle this on the client...
+		 */
+		$this->s->Send($this->RoomObjects[0]->sockets, "<onRoomUpdate event='RoomCountUpdate' id='".(int)$xml['id']."' int='1' />");
 		
 		return true;
 

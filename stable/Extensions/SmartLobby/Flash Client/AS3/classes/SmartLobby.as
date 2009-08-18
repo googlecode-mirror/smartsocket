@@ -16,6 +16,7 @@
 		//############### LISTING FEATURES
 		public var onRoomList:Function;
 		public var onUserList:Function;
+		public var onRoomUpdate:Function;
 
 		//############### ROOM CONTROL
 		public var onCreateRoom:Function;
@@ -52,13 +53,25 @@
 			this.onError(e);
 		}
 		protected function onXML(event:ProgressEvent) {
-			var xml:XML = XML(s.readUTFBytes(s.bytesAvailable));
-			trace("Cmd: "+xml.name());
-			if (this[xml.name()](xml)) {
-				trace("Cmd sent");
-			}else {
-				trace("Command not sent: "+this[xml.name()]);
+			s.flush();
+			var data:String = s.readUTFBytes(s.bytesAvailable);
+			
+			var buffer:Array = data.split("<!dlmtr/>");
+			buffer.pop();			
+			
+			for(var i:Number = 0; buffer[i]; i++) {			
+				trace("Command "+i+": "+buffer[i]+"***end");
+				var xml:XML = XML(buffer[i]);
+				trace("Cmd: "+xml.name());
+				
+				if (this[xml.name()](xml)) {
+					trace("Cmd sent");
+				}else {
+					trace("Command not sent: "+this[xml.name()]);
+				}
 			}
+			
+			s.flush();
 			return true;
 		}
 		public function send(data:String) {
