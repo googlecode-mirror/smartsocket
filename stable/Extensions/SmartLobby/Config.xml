@@ -1,6 +1,6 @@
 <config>
 	<mysql enabled="true">
-		<connection host="localhost" username="smartlobby" password="smartlobby" database="smartlobby" />;
+		<connection host="localhost" username="smartlobbydemo" password="!!11OBywan" database="smartlobbydemo" />;
 	</mysql>
 	
 	<default_rooms>
