@@ -2,8 +2,11 @@ package net.smartsocket.smartlobby.lobby
 {
 	import flash.display.MovieClip;
 	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	import flash.events.MouseEvent;
 	
+	import net.smartsocket.smartlobby.SmartLobby;
+	import net.smartsocket.smartlobby.events.*;
 	import net.smartsocket.smartlobby.lobby.components.*;
 	import net.smartsocket.smartlobby.tools.*;
 	
@@ -15,7 +18,10 @@ package net.smartsocket.smartlobby.lobby
 		
 		public function Lobby()
 		{
+			
+			
 			Globals.lobby = this;
+			
 			trace("Lobby has been initialized.");
 			
 			if(Globals.customListeners["home"]) {
@@ -30,6 +36,24 @@ package net.smartsocket.smartlobby.lobby
 			pm.y = 220;
 			addChild(pm);
 			
+			//# SmartLobby Events
+			addEventListener(SmartLobbyEvent.onCreateRoom, onCreateRoom);
+			addEventListener(SmartLobbyEvent.onMessagePrivate, onMessagePrivate);
+			addEventListener(SmartLobbyEvent.onMessageRoom, onMessageRoom);
+			addEventListener(SmartLobbyEvent.onRoomAdd, onRoomAdd);
+			addEventListener(SmartLobbyEvent.onRoomCountUpdate, onRoomCountUpdate);
+			addEventListener(SmartLobbyEvent.onRoomDelete, onRoomDelete);
+			addEventListener(SmartLobbyEvent.onRoomJoin, onRoomJoin);
+			addEventListener(SmartLobbyEvent.onRoomLeave, onRoomLeave);
+			addEventListener(SmartLobbyEvent.onRoomList, onRoomList);
+			addEventListener(SmartLobbyEvent.onTeamList, onTeamList);
+			addEventListener(SmartLobbyEvent.onTeamListChange, onTeamListChange);
+			addEventListener(SmartLobbyEvent.onTeamReadyStatusChange, onTeamReadyStatusChange);
+			addEventListener(SmartLobbyEvent.onUserJoin, onUserJoin);
+			addEventListener(SmartLobbyEvent.onUserLeave, onUserLeave);
+			addEventListener(SmartLobbyEvent.onUserList, onUserList);
+			
+			//# Initialization
 			addEventListener(Event.ADDED_TO_STAGE, init);
 			
 			try{
@@ -41,7 +65,7 @@ package net.smartsocket.smartlobby.lobby
 		
 		
 		
-		private function init(e:Event) {
+		private function init(e:Event) {			
 			Globals.customListeners["server"].joinRoom(0);
 		}
 		
@@ -52,7 +76,8 @@ package net.smartsocket.smartlobby.lobby
 		 * @params user:Object The object of the user joining the room.
 		 * @return void
 		 */
-		public function onUserJoin(user:Object):void {
+		public function onUserJoin(e:SmartLobbyEvent):void {
+			var user:Object = e.data;
 			var o:Object = {label:user.Username, data:user.uid}
 			ul._list.addItem(o);
 		}
@@ -62,7 +87,8 @@ package net.smartsocket.smartlobby.lobby
 		 * @params user:Object The object of the user leaving the room.
 		 * @return void
 		 */
-		public function onUserLeave(user:Object):void {
+		public function onUserLeave(e:SmartLobbyEvent):void {
+			var user:Object = e.data;
 			//# Delete them from our user list.
 			for(var i:Number = 0; i < ul._list.length; i++) {
 				var curr:Object = ul._list.getItemAt(i);
@@ -96,7 +122,8 @@ package net.smartsocket.smartlobby.lobby
 		 * @params userList:Array An array of user objects in the room.
 		 * @return void
 		 */
-		public function onUserList(userList:Array):void {
+		public function onUserList(e:SmartLobbyEvent):void {
+			var userList:Array = e.data;
 			ul._list.removeAll();
 			for(var i:Number = 0; i < userList.length; i++) {
 				var user:Object = userList[i];
@@ -111,7 +138,8 @@ package net.smartsocket.smartlobby.lobby
 		
 		//# Room event handling.
 		
-		public function onCreateRoom(room:Object):void {
+		public function onCreateRoom(e:SmartLobbyEvent):void {
+			var room:Object = e.data;
 			Globals.my.createdRoom = room._id;
 			Globals.customListeners["server"].joinRoom(room._id);
 		}
@@ -121,7 +149,9 @@ package net.smartsocket.smartlobby.lobby
 		 * @params room:Object The object of the newly joined room.
 		 * @return void
 		 */
-		public function onRoomJoin(room:Object):void {
+		public function onRoomJoin(e:SmartLobbyEvent):void {
+			var room:Object = e.data;
+			
 			Globals.my.room = room.ID;
 			try {
 				Globals.customListeners["root"].alert.animate_out();
@@ -148,7 +178,8 @@ package net.smartsocket.smartlobby.lobby
 		 * @params room:Object The object of the room being left.
 		 * @return void
 		 */
-		public function onRoomLeave(room:Object):void {
+		public function onRoomLeave(e:SmartLobbyEvent):void {
+			var room:Object = e.data;
 			if(room.ID != 0) {
 				Globals.customListeners["server"].joinRoom(0);				
 			}	
@@ -159,7 +190,8 @@ package net.smartsocket.smartlobby.lobby
 		 * @params roomList:Array An array of room objects.
 		 * @return void
 		 */
-		public function onRoomList(roomList:Array):void {
+		public function onRoomList(e:SmartLobbyEvent):void {
+			var roomList:Array = e.data;
 			gl.listType._list.removeAll();
 			for(var i:Number = 0; i < roomList.length; i++) {
 				var room:Object = roomList[i];
@@ -184,18 +216,9 @@ package net.smartsocket.smartlobby.lobby
 		 * @params room:Object The object newly created room.
 		 * @return void
 		 */
-		public function onRoomAdd(room:Object):void {
-//			var o:Object = {
-//					ID : room._id,
-//					Name : room._name,
-//					Current : room._currentUsers,
-//					Max : room._maxUsers,
-//					Creator : room._creator._username,
-//					Status : room._status,
-//					Private : room._private
-//				}
-				
-				gl.listType._list.dataProvider.addItem(room);
+		public function onRoomAdd(e:SmartLobbyEvent):void {
+			var room:Object = e.data;
+			gl.listType._list.dataProvider.addItem(room);
 		}
 		
 		/**
@@ -203,7 +226,8 @@ package net.smartsocket.smartlobby.lobby
 		 * @params room:Object The object of the room to be deleted
 		 * @return void
 		 */
-		public function onRoomDelete(room:Object):void {
+		public function onRoomDelete(e:SmartLobbyEvent):void {
+			var room:Object = e.data;
 			for(var i:Number = 0; i < gl.listType._list.dataProvider.length; i++) {
 				var curr:Object = gl.listType._list.dataProvider.getItemAt(i);
 				//trace(i+" ... "+curr._id);
@@ -219,8 +243,8 @@ package net.smartsocket.smartlobby.lobby
 		 * @params room:Object The object of the changed room.
 		 * @return void
 		 */
-		public function onRoomCountUpdate(room:Object):void {
-			
+		public function onRoomCountUpdate(e:SmartLobbyEvent):void {
+			var room:Object = e.data;
 			for(var i:Number = 0; i < gl.listType._list.dataProvider.length; i++) {
 				var curr:Object = gl.listType._list.dataProvider.getItemAt(i);
 				
@@ -240,7 +264,8 @@ package net.smartsocket.smartlobby.lobby
 		 * @params message:Object The object of the message. Contains the _sender and the _message
 		 * @return void
 		 */
-		public function onMessageRoom(message:Object):void {
+		public function onMessageRoom(e:SmartLobbyEvent):void {
+			var message:Object = e.data;
 			chat.in_txt.htmlText += message.Username+": "+message.Message;
 			chat.chat_scrollbar.update();
 			chat.chat_scrollbar.scrollPosition = chat.chat_scrollbar.maxScrollPosition;
@@ -251,12 +276,14 @@ package net.smartsocket.smartlobby.lobby
 		 * @params message:Object The object of the message. Contains the _sender and the _message.
 		 * @return void
 		 */
-		public function onMessagePrivate(message:Object):void {
+		public function onMessagePrivate(e:SmartLobbyEvent):void {
+			var message:Object = e.data;
 			pm.visible = true;
 			pm.newMessage(message);
 		}
 		
-		public function onTeamList(o:Object):void {
+		public function onTeamList(e:SmartLobbyEvent):void {
+			var o:Object = e.data;
 		 	gl.listType.unassigned.dataProvider.removeAll();
 		 	gl.listType.red.dataProvider.removeAll();
 		 	gl.listType.blue.dataProvider.removeAll();
@@ -268,7 +295,8 @@ package net.smartsocket.smartlobby.lobby
 		 	
 		 }
 		 
-		 public function onTeamListChange(o:Object):void {
+		 public function onTeamListChange(e:SmartLobbyEvent):void {
+			 var o:Object = e.data;
 		 	trace(gl.listType[o.From]);
 		 	
 		 	//# Remove old
@@ -295,7 +323,8 @@ package net.smartsocket.smartlobby.lobby
 		 	}
 		 }
 		 
-		 public function onTeamReadyStatusChange(o:Object) {
+		 public function onTeamReadyStatusChange(e:SmartLobbyEvent) {
+			 var o:Object = e.data;
 		 	
 		 	for(var i:Number = 0; i < gl.listType[o.Team].dataProvider.length; i++) {
 				var curr:Object = gl.listType[o.Team].dataProvider.getItemAt(i);

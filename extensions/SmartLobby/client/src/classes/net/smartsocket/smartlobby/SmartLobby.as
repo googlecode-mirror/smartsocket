@@ -4,8 +4,10 @@
 	import com.dynamicflash.util.Base64;
 	
 	import flash.events.*;
+	import flash.events.EventDispatcher;
 	import flash.net.Socket;
 	
+	import net.smartsocket.smartlobby.events.*;
 	import net.smartsocket.smartlobby.tools.*;
 	 public class SmartLobby extends Socket{
 		
@@ -43,12 +45,15 @@
 			addEventListener(Event.CLOSE, this.onDisconnect);
 			addEventListener(IOErrorEvent.IO_ERROR, this.onError);
 			
+			
 		}
+		
+		
 		
 		protected function onJSON(event:ProgressEvent):void {
 			
 			var incoming:String = this.readUTFBytes(this.bytesAvailable);
-			trace("SmartLobby => Received "+incoming);
+			trace("SmartLobby => Received "+incoming.replace("\r",""));
 			var arr:Array = incoming.split("\r");
 			arr.pop();
 			
@@ -63,10 +68,12 @@
 				var params = json[1];
 				
 				try {
-					trace("Trying function on SmartLobby");
-					Globals.lobby[method](params);
+					trace("Testing against SmartLobbyEvent class...");
+					Globals.lobby.dispatchEvent( new SmartLobbyEvent(SmartLobbyEvent[method], params) );
+					//Globals.lobby[method](params);
+					trace("SmartLobbyEvent "+method+" has been dispatched.");
 				}catch(e) {
-					trace("Did not fire on SmartLobby: "+e);
+					trace(method+" is not a SmartLobbyEvent. Cycling Globals.customListeners: "+e);
 					for(var j:String in Globals.customListeners) {
 						 
 						if(Globals.customListeners[j].hasOwnProperty(method)) {
@@ -76,12 +83,14 @@
 							}catch(e) {
 								trace("SmartLobby => "+method+" has errors: "+e);
 							}finally {
-								trace("=============");
+								
 							}
 							break;
 						}
 						
 					}
+				}finally {
+					trace("=============");
 				}
 			}
 		}
