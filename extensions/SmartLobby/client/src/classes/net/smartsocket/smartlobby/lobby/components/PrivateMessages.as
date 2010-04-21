@@ -6,6 +6,7 @@ package net.smartsocket.smartlobby.lobby.components
 	import flash.ui.Keyboard;
 	
 	import net.smartsocket.smartlobby.tools.*;
+	import net.smartsocket.smartlobby.SmartLobby;
 
 	public class PrivateMessages extends MovieClip
 	{
@@ -140,9 +141,9 @@ package net.smartsocket.smartlobby.lobby.components
 		public function send(e:KeyboardEvent) {
 			if(e.keyCode == Keyboard.ENTER) {
 				if (out_txt.text != "") {
-					messageContainer[currentTarget].push(Globals.my.Username+": "+out_txt.text);
-					in_txt.htmlText += Globals.my.Username+": "+out_txt.text;
-					Globals.customListeners["server"].sendPrivate(currentTargetUserId, out_txt.text);
+					messageContainer[currentTarget].push(SmartLobby.my.Username+": "+out_txt.text);
+					in_txt.htmlText += SmartLobby.my.Username+": "+out_txt.text;
+					SmartLobby.customListeners["server"].sendPrivate(currentTargetUserId, out_txt.text);
 					out_txt.text = "";
 				}
 			}

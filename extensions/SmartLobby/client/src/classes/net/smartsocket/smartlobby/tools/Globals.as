@@ -1,9 +1,6 @@
 package net.smartsocket.smartlobby.tools
 {
 	import net.smartsocket.smartlobby.lobby.Lobby;
-	//import net.tacticsofwar.CommanderHome;
-	//import net.tacticsofwar.TacticsOfWar;
-	//import net.tacticsofwar.game.GameClip;
 	
 	public final class Globals
 	{

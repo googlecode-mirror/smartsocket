@@ -20,12 +20,12 @@ package net.smartsocket.smartlobby.lobby
 		{
 			
 			
-			Globals.lobby = this;
+			SmartLobby.lobby = this;
 			
 			trace("Lobby has been initialized.");
 			
-			if(Globals.customListeners["home"]) {
-				Globals.customListeners["root"].removeChild(Globals.customListeners["home"]);
+			if(SmartLobby.customListeners["home"]) {
+				SmartLobby.customListeners["root"].removeChild(SmartLobby.customListeners["home"]);
 			}
 						
 			pm = new PrivateMessages();
@@ -57,7 +57,7 @@ package net.smartsocket.smartlobby.lobby
 			addEventListener(Event.ADDED_TO_STAGE, init);
 			
 			try{
-				Globals.customListeners["server"].initCustomLobbyFunctions();
+				SmartLobby.customListeners["server"].initCustomLobbyFunctions();
 			}catch(e) {
 				trace("No custom lobby functions on server class.");
 			}
@@ -66,7 +66,7 @@ package net.smartsocket.smartlobby.lobby
 		
 		
 		private function init(e:Event) {			
-			Globals.customListeners["server"].joinRoom(0);
+			SmartLobby.customListeners["server"].joinRoom(0);
 		}
 		
 		//# User event handling.
@@ -100,7 +100,7 @@ package net.smartsocket.smartlobby.lobby
 			}
 			
 			//# We need to check and see if we also need to delete them from the team lists
-			if(Globals.my.room != 0) {
+			if(SmartLobby.my.room != 0) {
 				//# We are not in the lobby so we definitely need to fin them in the team list and delete them
 				for(i = 0; i < gl.listType[user.Team].dataProvider.length; i++) {
 					var curr:Object = gl.listType[user.Team].dataProvider.getItemAt(i);
@@ -140,8 +140,8 @@ package net.smartsocket.smartlobby.lobby
 		
 		public function onCreateRoom(e:SmartLobbyEvent):void {
 			var room:Object = e.data;
-			Globals.my.createdRoom = room._id;
-			Globals.customListeners["server"].joinRoom(room._id);
+			SmartLobby.my.createdRoom = room._id;
+			SmartLobby.customListeners["server"].joinRoom(room._id);
 		}
 		
 		/**
@@ -152,24 +152,24 @@ package net.smartsocket.smartlobby.lobby
 		public function onRoomJoin(e:SmartLobbyEvent):void {
 			var room:Object = e.data;
 			
-			Globals.my.room = room.ID;
+			SmartLobby.my.room = room.ID;
 			try {
-				Globals.customListeners["root"].alert.animate_out();
+				SmartLobby.customListeners["root"].alert.animate_out();
 				
 			}catch(e) {
 				
 			}
-			Globals.customListeners["server"].getUserList();
+			SmartLobby.customListeners["server"].getUserList();
 			
 			if(room.ID != 0) {
 				gl.switchTo("tl");
-				Globals.customListeners["server"].getTeamList();
-				Globals.customListeners["server"].joinTeam("unassigned");
+				SmartLobby.customListeners["server"].getTeamList();
+				SmartLobby.customListeners["server"].joinTeam("unassigned");
 							
 			}else {
-				Globals.my.createdRoom = null;
+				SmartLobby.my.createdRoom = null;
 				gl.switchTo("gl");
-				Globals.customListeners["server"].getRoomList();
+				SmartLobby.customListeners["server"].getRoomList();
 			}
 		}
 		
@@ -181,7 +181,7 @@ package net.smartsocket.smartlobby.lobby
 		public function onRoomLeave(e:SmartLobbyEvent):void {
 			var room:Object = e.data;
 			if(room.ID != 0) {
-				Globals.customListeners["server"].joinRoom(0);				
+				SmartLobby.customListeners["server"].joinRoom(0);				
 			}	
 		}
 		
@@ -316,10 +316,10 @@ package net.smartsocket.smartlobby.lobby
 		 		gl.listType[o.To].addItem({Username:o.Username, Status:o.Status});
 		 	}
 		 	
-		 	if(o.Username == Globals.my.Username) {
+		 	if(o.Username == SmartLobby.my.Username) {
 		 		
-		 		Globals.my.Team = o.To;
-		 		trace("This is me, my team is now "+Globals.my.Team);
+		 		SmartLobby.my.Team = o.To;
+		 		trace("This is me, my team is now "+SmartLobby.my.Team);
 		 	}
 		 }
 		 

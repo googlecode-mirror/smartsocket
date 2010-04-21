@@ -5,6 +5,7 @@ package net.smartsocket.smartlobby.lobby.components
 	
 	import net.smartsocket.smartlobby.tools.*;
 	import net.smartsocket.smartlobby.lobby.components.alertclips.CreateGame;
+	import net.smartsocket.smartlobby.SmartLobby;
 
 	public class Options extends MovieClip
 	{
@@ -18,11 +19,11 @@ package net.smartsocket.smartlobby.lobby.components
 		
 		public function handle_create(e:MouseEvent) {
 			
-			Globals.customListeners["root"].alert = new Alert("MovieClip", CreateGame, "Create Game");
-			Globals.customListeners["root"].alert.ok.addEventListener(MouseEvent.MOUSE_UP, createRoom);
-			Globals.customListeners["root"].addChild(Globals.customListeners["root"].alert);
+			SmartLobby.customListeners["root"].alert = new Alert("MovieClip", CreateGame, "Create Game");
+			SmartLobby.customListeners["root"].alert.ok.addEventListener(MouseEvent.MOUSE_UP, createRoom);
+			SmartLobby.customListeners["root"].addChild(SmartLobby.customListeners["root"].alert);
 			
-			var roomOptions = Globals.customListeners["root"].alert.cpane_mc.content;
+			var roomOptions = SmartLobby.customListeners["root"].alert.cpane_mc.content;
 			
 			//# Add Maps
 			roomOptions.map.addItem({label:"Standoff", data:"Standoff"});
@@ -30,7 +31,7 @@ package net.smartsocket.smartlobby.lobby.components
 		}
 		
 		private function createRoom(e:MouseEvent) {
-			var roomOptions = Globals.customListeners["root"].alert.cpane_mc.content;
+			var roomOptions = SmartLobby.customListeners["root"].alert.cpane_mc.content;
 			
 			var o:Object = {
 				"_name" : roomOptions.name_txt.text,
@@ -38,7 +39,7 @@ package net.smartsocket.smartlobby.lobby.components
 				"_private" : roomOptions.isPrivate.selected,
 				"_map" : roomOptions.map.value
 			};
-			Globals.customListeners["server"].createRoom(o);
+			SmartLobby.customListeners["server"].createRoom(o);
 		}
 		
 	}

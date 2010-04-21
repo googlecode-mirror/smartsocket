@@ -1,11 +1,10 @@
 package net.smartsocket.smartlobby.lobby.components
 {
 	import com.greensock.TweenLite;
-	import com.greensock.easing.*
-	import flash.events.*;
+	import com.greensock.easing.*;
 	
 	import flash.display.MovieClip;
-	import flash.events.Event;
+	import flash.events.*;
 	import flash.text.TextField;
 	
 	import net.smartsocket.smartlobby.tools.*;

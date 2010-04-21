@@ -6,6 +6,7 @@ package net.smartsocket.smartlobby.lobby.components
 	import flash.events.MouseEvent;
 	
 	import net.smartsocket.smartlobby.tools.*;
+	import net.smartsocket.smartlobby.SmartLobby;
 	
 	public class GameList extends MovieClip
 	{
@@ -54,7 +55,7 @@ package net.smartsocket.smartlobby.lobby.components
 				listType.red.dataProvider = new DataProvider(new Array());
 				listType.blue.dataProvider = new DataProvider(new Array());
 				
-				if(Globals.my.createdRoom != Globals.my.room) {
+				if(SmartLobby.my.createdRoom != SmartLobby.my.room) {
 					//# Disable these unless they are the creator of the room
 					listType.startBtn.visible = false;
 					listType.optionsBtn.visible = false;
@@ -78,34 +79,34 @@ package net.smartsocket.smartlobby.lobby.components
 		}
 		
 		public function joinRoom(e:MouseEvent) {
-			Globals.customListeners["server"].joinRoom(Number(listType._list.selectedItem.ID));
+			SmartLobby.customListeners["server"].joinRoom(Number(listType._list.selectedItem.ID));
 		}
 		public function joinRed(e:MouseEvent) {
-			Globals.customListeners["server"].joinTeam("red");
-			Globals.my.team = "red";
+			SmartLobby.customListeners["server"].joinTeam("red");
+			SmartLobby.my.team = "red";
 			listType.readyBtn.visible = true;
 			
 		}
 		public function joinBlue(e:MouseEvent) {
-			Globals.customListeners["server"].joinTeam("blue");
-			Globals.my.team = "blue";
+			SmartLobby.customListeners["server"].joinTeam("blue");
+			SmartLobby.my.team = "blue";
 			listType.readyBtn.visible = true;
 		}
 		public function ready(e:MouseEvent) {
-			Globals.customListeners["server"].ready();
+			SmartLobby.customListeners["server"].ready();
 		}
 		public function leave(e:MouseEvent) {
 			var o:Object = ["leaveGameRoom",{}]
-			Globals.customListeners["server"].send(o);
-			Globals.customListeners["server"].leaveRoom();
-			Globals.my.team = null;
+			SmartLobby.customListeners["server"].send(o);
+			SmartLobby.customListeners["server"].leaveRoom();
+			SmartLobby.my.team = null;
 		}
 		public function options(e:MouseEvent) {
 			//Globals.server.gameOptions();
 		}
 		public function start(e:MouseEvent) {
 			var o:Object = ["startGame",{}];
-			Globals.customListeners["server"].send(o);
+			SmartLobby.customListeners["server"].send(o);
 		}
 		public function kick(e:MouseEvent) {
 			//Globals.server.kick();

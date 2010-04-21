@@ -7,80 +7,69 @@
 	import flash.events.EventDispatcher;
 	import flash.net.Socket;
 	
+	import net.smartsocket.SmartSocketClient;
 	import net.smartsocket.smartlobby.events.*;
+	import net.smartsocket.smartlobby.lobby.Lobby;
 	import net.smartsocket.smartlobby.tools.*;
-	 public class SmartLobby extends Socket{
+
+	 public class SmartLobby extends SmartSocketClient{
+		 
+		 
 		
 		//############### CONNECTION CONTROL
-		public function onConnect(e:Event):void{trace("onConnect method currently does nothing. "+e);}
-		public function onDisconnect(e:Event):void{trace("onDisconnect method currently does nothing. "+e);}
-		public function onError(e:Event):void{trace("onError method currently does nothing. "+e);}
+		public override function onConnect(e:Event):void{trace("onConnect method currently does nothing. "+e);}
+		public override function onDisconnect(e:Event):void{trace("onDisconnect method currently does nothing. "+e);}
+		public override function onError(e:Event):void{trace("onError method currently does nothing. "+e);}
 		
 		//############### ACCOUNT CONTROL
 		public function onLogin(e:Object):void{trace("onLogin method currently does nothing. "+e);}
-		public function onInitUserObject(e:Object):void{trace("onJoinLobby method currently does nothing. "+e);}
-
-		//############### LISTING FEATURES
-		//public function onRoomList(e:Array):void{trace("onRoomList method currently does nothing. "+e);}
-		//public function onUserList(e:Array):void{trace("onUserList method currently does nothing. "+e.toString());}
-		//public function onRoomUpdate(e:Array):void{trace("onRoomUpdate method currently does nothing. "+e);}
-
-		//############### ROOM CONTROL
-		//public function onCreateRoom(e:Array):void{trace("onCreateRoom method currently does nothing. "+e);}
-		//public function onJoinRoom(e:Array):void{trace("onJoinRoom method currently does nothing. "+e);}
-		//public function onLeaveRoom(e:Array):void{trace("onLeaveRoom method currently does nothing. "+e);}
-		//public function onUserJoin(e:Array):void{trace("onUserJoin method currently does nothing. "+e);}
-		//public function onUserLeave(e:Array):void{trace("onUserLeave method currently does nothing. "+e);}
-
-		//############### CHAT CONTROL
-		//public function onRoomMessage(e:JSON):void{};
-		//public function onPrivateMessage(e:JSON):void{};
-
-		//############### USER OBJECT CONTROL
-		public var my:Object = {Username:null};
-
-		public function init():void {
-			addEventListener(ProgressEvent.SOCKET_DATA, this.onJSON);
-			addEventListener(Event.CONNECT, this.onConnect);
-			addEventListener(Event.CLOSE, this.onDisconnect);
-			addEventListener(IOErrorEvent.IO_ERROR, this.onError);
-			
-			
+		public function onInitUserObject(e:Object):void{trace("onInitUserObject method currently does nothing. "+e);}
+		
+		public static var lobby:Lobby;
+		public static var my:Object = [];
+		public static var gameRunning:Boolean = false;
+		public static var customListeners:Array = new Array();
+		
+		public function SmartLobby() {
+			super();
 		}
 		
-		
-		
-		protected function onJSON(event:ProgressEvent):void {
-			
+		protected override function onJSON(event:ProgressEvent):void {
 			var incoming:String = this.readUTFBytes(this.bytesAvailable);
 			trace("SmartLobby => Received "+incoming.replace("\r",""));
 			var arr:Array = incoming.split("\r");
 			arr.pop();
 			
 			for(var i:Number = 0; i < arr.length; i++) {
+				var data:String;
 				
-				var data:String = com.dynamicflash.util.Base64.decode(arr[i]);
+				if(useBase64) {				
+					data = com.dynamicflash.util.Base64.decode(arr[i]);
+				}else {
+					data = arr[i]
+				}
+				
 				trace("SmartLobby => Processing "+data);
 				
 				var decoder:JSONDecoder = new JSONDecoder(data);
 				var json:Array = decoder.getValue();				
 				var method:String = json[0];				
-				var params = json[1];
+				var params:* = json[1];
 				
 				try {
 					trace("Testing against SmartLobbyEvent class...");
-					Globals.lobby.dispatchEvent( new SmartLobbyEvent(SmartLobbyEvent[method], params) );
-					//Globals.lobby[method](params);
+					SmartLobby.lobby.dispatchEvent( new SmartLobbyEvent(SmartLobbyEvent[method], params) );
+					//SmartLobby.lobby[method](params);
 					trace("SmartLobbyEvent "+method+" has been dispatched.");
-				}catch(e) {
-					trace(method+" is not a SmartLobbyEvent. Cycling Globals.customListeners: "+e);
-					for(var j:String in Globals.customListeners) {
+				}catch(e:Error) {
+					trace(method+" is not a SmartLobbyEvent. Cycling SmartLobby.customListeners: "+e);
+					for(var j:String in SmartLobby.customListeners) {
 						 
-						if(Globals.customListeners[j].hasOwnProperty(method)) {
+						if(SmartLobby.customListeners[j].hasOwnProperty(method)) {
 							try {
-								trace("SmartLobby => Trying "+method+" on "+Globals.customListeners[j]);
-								Globals.customListeners[j][method](params);
-							}catch(e) {
+								trace("SmartLobby => Trying "+method+" on "+SmartLobby.customListeners[j]);
+								SmartLobby.customListeners[j][method](params);
+							}catch(e:Error) {
 								trace("SmartLobby => "+method+" has errors: "+e);
 							}finally {
 								
@@ -94,75 +83,58 @@
 				}
 			}
 		}
-			
-		
-		public function send(data:Object):Boolean {
-			var json:String = JSON.encode(data);
-			try {
-				trace("SmartLobby => Sending "+json);
-				this.writeUTFBytes( com.dynamicflash.util.Base64.encode(json)+"\r");
-				this.flush();
-				
-				return true;
-			}catch (e) {
-				trace("SmartLobby => Send error ("+json+"):"+e);
-				return false;
-			}
-			return false;
-		}
-		//##############
 		
 		//# SmartLobby core functions.
-		public function login(details:Object) {
+		public function login(details:Object):void {
 			var o:Object = ["login", details];				
 			send(o);
 		}
 		
-		public function joinLobby() {
+		public function joinLobby():void {
 			var o:Object = ["joinLobby",{}];
 			send(o);
 		}
 		
-		public function leaveLobby() {
+		public function leaveLobby():void {
 			var o:Object = ["leaveLobby",{}];
 			send(o);
 		}
 		
-		public function joinRoom(room:Number) {
+		public function joinRoom(room:Number):void {
 			var o:Object = ["joinRoom",{
 				"_id" : room
 			}];
 			send(o);
 		}
 		
-		public function getUserList() {
+		public function getUserList():void {
 			var o:Object = ["getUserList",{}];
 			send(o);
 		}
 		
-		public function getRoomList() {
+		public function getRoomList():void {
 			var o:Object = ["getRoomList",{}];
 			send(o);
 		}
 		
-		public function createRoom(details:Object) {
+		public function createRoom(details:Object):void {
 			var o:Object = ["createRoom", details];			
 			send(o);
 		}
 		
-		public function leaveRoom() {
+		public function leaveRoom():void {
 			var o:Object = ["leaveRoom",{}];			
 			send(o);			
 		}
 		
-		public function sendRoom(message:String) {
+		public function sendRoom(message:String):void {
 			var o:Object = ["sendRoom",{
 				"_message" : message
 			}];				
 			send(o);
 		}
 		
-		public function sendPrivate(target:String, message:String) {
+		public function sendPrivate(target:String, message:String):void {
 			var o:Object = ["sendPrivate",{
 				"_message" : message,
 				"_target" : target

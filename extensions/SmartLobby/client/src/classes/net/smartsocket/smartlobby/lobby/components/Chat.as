@@ -5,6 +5,7 @@ package net.smartsocket.smartlobby.lobby.components
 	import flash.ui.Keyboard;
 	
 	import net.smartsocket.smartlobby.tools.*;
+	import net.smartsocket.smartlobby.SmartLobby;
 	
 	public class Chat extends MovieClip
 	{
@@ -22,7 +23,7 @@ package net.smartsocket.smartlobby.lobby.components
 			if(e.keyCode == Keyboard.ENTER) {
 				
 				if(out_txt.text != "") {
-					Globals.customListeners["server"].sendRoom(out_txt.text);
+					SmartLobby.customListeners["server"].sendRoom(out_txt.text);
 					out_txt.text = "";
 				}
 			}
