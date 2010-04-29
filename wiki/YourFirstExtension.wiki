@@ -15,6 +15,7 @@ Before you start, be sure that the SmartSocket.jar is in your classpath, whereve
 {{{
 package example;
 import net.smartsocket.ThreadHandler;
+import net.smartsocket.protocols.json.ClientCall;
 import org.json.simple.JSONObject;
 
 public class Example {
@@ -60,6 +61,11 @@ public class Example {
 
         //# Let's send the message back to the client for testing.
         thread.send("The server received :"+json+" from you.");
+
+        //# Let's make our own server greeting!
+        ClientCall clientCall = new ClientCall("helloBackAtYou");
+        clientCall.put("serverGreeting", "Hello back at ya!");
+        thread.send(clientCall);
     }
 }
 
