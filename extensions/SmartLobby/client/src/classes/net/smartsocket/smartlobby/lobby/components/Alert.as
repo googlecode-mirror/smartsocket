@@ -26,15 +26,16 @@ package net.smartsocket.smartlobby.lobby.components
 	import flash.events.*;
 	import flash.text.TextField;
 	
-	import net.smartsocket.smartlobby.tools.*;
-	
 	public class Alert extends MovieClip {
 		
 		var baseW;
 		var baseH;
+		public var ok;
+		public var cpane_mc;
+		private var padding:Number = 10;
 		
 		public function Alert(type:String, value:*, title:String=null, draggable:Boolean=false)	{
-								
+			//ok = this["ok"];				
 			var src:*;
 			switch(type) {
 				
@@ -44,6 +45,9 @@ package net.smartsocket.smartlobby.lobby.components
 				src.multiline = true;
 				src.wordWrap = true;
 				src.htmlText = value;
+				TextField(src).textColor = 0xFFFFFF;
+				src.selectable = false;
+				
 				break;
 				
 				case "MovieClip":
@@ -56,9 +60,12 @@ package net.smartsocket.smartlobby.lobby.components
 			
 			this["tab"].label.text = title;
 			this["cpane_mc"].source = src;
+			
+			this["cpane_mc"].content.x += padding;
+			this["cpane_mc"].content.y += padding;
 
-			this.x = 760/2;
-			this.y = 760/2;
+			this.x = 760 / 2;
+			this.y = 760 / 2;
 			
 			addEventListener(Event.ADDED_TO_STAGE, animate_in);
 			

@@ -32,6 +32,7 @@ package net.smartsocket.smartlobby.lobby
 	public class Lobby extends MovieClip
 	
 	{
+		public var options;
 		
 		public var pm:PrivateMessages;
 		
@@ -44,7 +45,7 @@ package net.smartsocket.smartlobby.lobby
 			trace("Lobby has been initialized.");
 			
 			if(SmartLobby.customListeners["home"]) {
-				SmartLobby.customListeners["root"].removeChild(SmartLobby.customListeners["home"]);
+				GameLoader.self.removeChild(SmartLobby.customListeners["home"]);
 			}
 						
 			pm = new PrivateMessages();
@@ -173,7 +174,7 @@ package net.smartsocket.smartlobby.lobby
 			
 			SmartLobby.my.room = room.ID;
 			try {
-				SmartLobby.customListeners["root"].alert.animate_out();
+				GameLoader.alert.animate_out();
 				
 			}catch(e) {
 				

@@ -25,6 +25,7 @@ package net.smartsocket.smartlobby {
 	import flash.events.*;
 	import flash.events.EventDispatcher;
 	import flash.net.Socket;
+	import flash.utils.ByteArray;
 	
 	import net.smartsocket.SmartSocketClient;
 	import net.smartsocket.smartlobby.events.*;
@@ -54,19 +55,32 @@ package net.smartsocket.smartlobby {
 		}
 		
 		protected override function onJSON(event:ProgressEvent):void {
-			var incoming:String = this.readUTFBytes(this.bytesAvailable);
+			var incoming:String;
+			
+			if(useZlib) {
+				//# Create a byteArray to hold our data
+				var byteArray:ByteArray = new ByteArray();
+				
+				//# Read the ByteArray data sent from the server into byteArray
+				readBytes(byteArray);
+				
+				//# Uncompress the ZLIB string.
+				byteArray.uncompress();
+				
+				//# Read the JSON string that was uncompressed.
+				incoming = byteArray.readUTFBytes(byteArray.bytesAvailable);				
+			}else {
+				incoming = this.readUTFBytes(this.bytesAvailable);
+			}
+			
 			trace("SmartLobby => Received "+incoming.replace("\r",""));
 			var arr:Array = incoming.split("\r");
 			arr.pop();
 			
 			for(var i:Number = 0; i < arr.length; i++) {
-				var data:String;
+				var data:String;				
 				
-				if(useBase64) {				
-					data = com.dynamicflash.util.Base64.decode(arr[i]);
-				}else {
-					data = arr[i]
-				}
+				data = arr[i];				
 				
 				trace("SmartLobby => Processing "+data);
 				

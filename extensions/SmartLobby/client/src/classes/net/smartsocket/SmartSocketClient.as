@@ -25,6 +25,7 @@ package net.smartsocket {
 	import flash.events.*;
 	import flash.events.EventDispatcher;
 	import flash.net.Socket;
+	import flash.utils.ByteArray;
 	
 	import net.smartsocket.smartlobby.lobby.Lobby;
 	
@@ -39,39 +40,43 @@ package net.smartsocket {
 				
 		public static var customListeners:Array = new Array();
 		
-		public static var useBase64:Boolean = false;
+		public static var useZlib:Boolean = false;
 		
 		public function SmartSocketClient() {
 			addEventListener(ProgressEvent.SOCKET_DATA, this.onJSON);
 			addEventListener(Event.CONNECT, this.onConnect);
 			addEventListener(Event.CLOSE, this.onDisconnect);
 			addEventListener(IOErrorEvent.IO_ERROR, this.onError);
-		}
+		}		
 		
-//		public function init():void {
-//			addEventListener(ProgressEvent.SOCKET_DATA, this.onJSON);
-//			addEventListener(Event.CONNECT, this.onConnect);
-//			addEventListener(Event.CLOSE, this.onDisconnect);
-//			addEventListener(IOErrorEvent.IO_ERROR, this.onError);			
-//		}
-		
-		
-		
-		protected function onJSON(event:ProgressEvent):void {
+		protected function onJSON(event:ProgressEvent):void {			
+			var incoming:String;
 			
-			var incoming:String = this.readUTFBytes(this.bytesAvailable);
+			if(useZlib) {
+				//# Create a byteArray to hold our data
+				var byteArray:ByteArray = new ByteArray();
+				
+				//# Read the ByteArray data sent from the server into byteArray
+				readBytes(byteArray);
+				
+				//# Uncompress the ZLIB string.
+				byteArray.uncompress();
+				
+				//# Read the JSON string that was uncompressed.
+				incoming = byteArray.readUTFBytes(byteArray.bytesAvailable);				
+			}else {
+				incoming = this.readUTFBytes(this.bytesAvailable);
+			}
+			
 			trace("SmartSocketClient => Received "+incoming.replace("\r",""));
+			
 			var arr:Array = incoming.split("\r");
 			arr.pop();
 			
 			for(var i:Number = 0; i < arr.length; i++) {
 				var data:String;
 				
-				if(useBase64) {				
-					data = com.dynamicflash.util.Base64.decode(arr[i]);
-				}else {
-					data = arr[i]
-				}
+				data = arr[i];
 				
 				trace("SmartSocketClient => Processing "+data);
 				
@@ -102,12 +107,23 @@ package net.smartsocket {
 		
 		
 		public function send(data:Object):Boolean {
+			//# Encode our client call to JSON
 			var json:String = JSON.encode(data);
+			
 			try {
 				trace("SmartSocketClient => Sending "+json);
 				
-				if(useBase64) {				
-					this.writeUTFBytes( com.dynamicflash.util.Base64.encode(json)+"\r");
+				if(useZlib) {
+					//# Create a byteArray to hold the data
+					var byteArray:ByteArray = new ByteArray();
+					
+					//# Write the JSON String to the byte array
+					byteArray.writeUTFBytes(json);
+					
+					//# Compress the byteArray
+					byteArray.compress();
+					trace("Sending byteArray of size: "+byteArray.length);					
+					this.writeBytes(byteArray);
 				}else {
 					this.writeUTFBytes( json+"\r");
 				}
