@@ -1,0 +1,11 @@
+Introduction to SmartSocket (1 of 2):
+
+<wiki:video url="http://www.youtube.com/watch?v=n1oRWmeVj2U"/>
+
+Introduction to SmartSocket (2 of 2):
+
+<wiki:video url="http://www.youtube.com/watch?v=JTwRm6biFUc"/>
+
+Demonstration of some capabilities of SmartSocket + SmartLobby:
+
+<wiki:video url="http://www.youtube.com/watch?v=JNdZzYePZrk"/>
