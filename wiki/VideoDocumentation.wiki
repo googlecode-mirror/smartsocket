@@ -1,3 +1,6 @@
+#labels Featured,Documentation
+Here's some video documentation of how to get started developing applications with SmartSocket. For best quality, click the "Watch on YouTube" button on the bottom right of the video. There is also a 720p HD version :)
+
 Introduction to SmartSocket (1 of 2):
 
 <wiki:video url="http://www.youtube.com/watch?v=n1oRWmeVj2U"/>
