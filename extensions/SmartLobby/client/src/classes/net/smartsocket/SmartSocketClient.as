@@ -122,7 +122,7 @@ package net.smartsocket {
 					
 					//# Compress the byteArray
 					byteArray.compress();
-					trace("Sending byteArray of size: "+byteArray.length);					
+					trace("Original Length: "+json.length+" Compressed Length + MetaData: "+byteArray.length);					
 					this.writeBytes(byteArray);
 				}else {
 					this.writeUTFBytes( json+"\r");
